@@ -1,0 +1,22 @@
+# Ignorar cachés de Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Ignorar archivos de entorno virtual
+venv/
+env/
+.venv/
+.env/
+
+# Ignorar archivos de sistema operativo
+.DS_Store
+Thumbs.db
+
+# Ignorar archivos de configuración personales de editores
+*.vscode/
+.idea/
+
+# Archivos de logs o temporales
+*.log
+*.tmp
