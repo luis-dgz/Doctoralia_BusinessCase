@@ -93,7 +93,7 @@ VALUES ('1','2021/12/01','C4','P3','1','160','30'),
 ('34','2022/01/01','C17','P6','1','650','10'),
 ('35','2022/01/01','C1','P4','1','350','30');
  
- INSERT INTO BUSINESS_CASE.CLIENTS (client_id,first_name,last_name,city,country)
+INSERT INTO BUSINESS_CASE.CLIENTS (client_id,first_name,last_name,city,country)
 VALUES('C1','juan','perez','Guadalajara','Mexico'),
 ('C2','maria','lozano','Medellin','Colombia'),
 ('C3','ana','espinoza','Torreon','Mexico'),
@@ -125,43 +125,86 @@ VALUES ('P1','100','80','Colombia','10'),
 
 #TEST
 #1. Seleccione todos los registros de la tabla PRODUCT
-
+SELECT * FROM PRODUCT;
 
 #2.Seleccione todas las ventas del primero de Diciembre 2021
-	
+SELECT *
+FROM BUSINESS_CASE.INVOICES
+WHERE inv_date = '2021-12-01';
 
 #3 Seleccione todos los clientes que viven en Mexico
-						
+SELECT *
+FROM BUSINESS_CASE.CLIENTS
+WHERE country = 'Mexico';						
 
 #4 Seleccione todos los productos que se vendieron en la factura 25
-
+SELECT *
+FROM BUSINESS_CASE.INVOICES
+WHERE invoice_id = 25;
 
 #5 ¿Cuantos productos diferentes se venden en Colombia?
-
+SELECT COUNT(DISTINCT product_id) AS productos_diferentes
+FROM BUSINESS_CASE.PRICE
+WHERE country = 'Colombia';
 
 
 #6 Seleccione todos los clientes que viven en Cartagena
-	
+SELECT *
+FROM BUSINESS_CASE.CLIENTS
+WHERE city = 'Cartagena';	
 
 #7 ¿Cuantos clientes viven en la ciudad Guadalajara?
-
+SELECT COUNT(*) AS total_clientes_guadalajara
+FROM BUSINESS_CASE.CLIENTS
+WHERE city = 'Guadalajara';
 
 #8 ¿Cuál fue el monto total facturado en Mexico en Diciembre 2021?
-
+SELECT SUM(amount_eur) AS total_facturado_mexico_dic2021
+FROM BUSINESS_CASE.INVOICES
+WHERE country_code = 30
+    AND inv_date BETWEEN '2021-12-01' AND '2021-12-31';
 
 #9 ¿Cuantos productos "producto_1" se vendieron en Colombia desde el primero hasta el 15 de diciembre 2021?
-
+SELECT SUM(i.quantity) AS total_producto_1_colombia
+FROM BUSINESS_CASE.INVOICES i
+JOIN BUSINESS_CASE.PRODUCT p ON i.product_id = p.product_id
+WHERE p.product_name = 'producto_1'
+    AND i.country_code = 10
+    AND i.inv_date BETWEEN '2021-12-01' AND '2021-12-15';
         
 #10 ¿Cuántas veces comprò el cliente C10 en México?
-	
+SELECT COUNT(DISTINCT i.invoice_id) AS compras_cliente_C10_mexico
+FROM BUSINESS_CASE.INVOICES i
+WHERE i.client_id = 'C10'
+    AND i.country_code = 30;	
     
 #11 ¿Cuánto gastò el cliente C17 en Diciembre para la compra del "producto_6"?
-
+SELECT SUM(i.amount_eur) AS total_gastado
+FROM BUSINESS_CASE.INVOICES i
+JOIN BUSINESS_CASE.PRODUCT p ON i.product_id = p.product_id
+WHERE i.client_id = 'C17'
+    AND p.product_name = 'producto_6'
+    AND MONTH(i.inv_date) = 12
+    AND YEAR(i.inv_date) = 2021;
         
 #12 Seleccione la facturaciòn total de los dos Paises en el mes de diciembre agrupandola por Pais
-
+SELECT pr.country, SUM(i.amount_eur) AS total_facturado
+FROM BUSINESS_CASE.INVOICES i
+JOIN BUSINESS_CASE.PRICE pr ON i.country_code = pr.country_code
+WHERE MONTH(i.inv_date) = 12 AND YEAR(i.inv_date) = 2021
+GROUP BY pr.country;
 
 #13 Seleccione la tabla INVOICE agregando el indicador "price_type" que informe si el precio por producto fue "STANDARD" o "PROMO"
+SELECT 
+    i.*,
+    CASE 
+        WHEN i.amount_eur / i.quantity = pr.price_standard THEN 'STANDARD'
+        WHEN i.amount_eur / i.quantity = pr.price_promo THEN 'PROMO'
+        ELSE 'UNKNOWN'
+    END AS price_type
+FROM BUSINESS_CASE.INVOICES i
+JOIN BUSINESS_CASE.PRICE pr ON i.product_id = pr.product_id
+    AND i.country_code = pr.country_code;
 
 #14 "Dada la informaciòn disponible en las tablas, cree un dashboard utilizando Tableau
 # ¿Cuales conclusiones puede observar y cuales recomendaciones tendrìa?"
